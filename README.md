@@ -8,56 +8,22 @@ People sign up by texting your number. Every week, the service texts them to ask
 
 ## What You'll Need
 
-- A computer (Mac or Windows)
 - A credit card (for Twilio - it costs about $1-2/month for the phone number, plus less than a penny per text)
-- About 30 minutes for initial setup (with help from someone comfortable with computers)
+- A Google Cloud account (the server runs for free on Google's free tier)
+- A computer (Mac or Windows) for initial setup and viewing data
 
 ---
 
-## Step 1: Install Python
-
-Python is the programming language this project runs on. You only need to install it once.
-
-**On Windows:**
-1. Go to https://www.python.org/downloads/
-2. Click the big yellow **"Download Python"** button
-3. Run the installer
-4. **IMPORTANT:** On the first screen of the installer, check the box that says **"Add Python to PATH"** (it's at the bottom - don't skip this!)
-5. Click "Install Now"
-
-**On Mac:**
-1. Go to https://www.python.org/downloads/
-2. Click the big yellow **"Download Python"** button
-3. Open the downloaded file and follow the installer
-
-**How to check it worked:**
-1. Open a terminal:
-   - **Windows:** Press the Windows key, type `cmd`, and press Enter
-   - **Mac:** Press Cmd+Space, type `Terminal`, and press Enter
-2. Type `python --version` and press Enter
-3. You should see something like `Python 3.12.1` (the exact number doesn't matter as long as it starts with 3)
-
----
-
-## Step 2: Download This Project
-
-1. Go to the GitHub page for this project
-2. Click the green **"Code"** button
-3. Click **"Download ZIP"**
-4. Unzip the folder somewhere you'll remember (like your Desktop)
-
----
-
-## Step 3: Set Up Twilio (Your Text Message Number)
+## Step 1: Set Up Twilio (Your Text Message Number)
 
 Twilio is the service that actually sends and receives text messages. Here's how to get set up:
 
-### 3a: Create a Twilio account
+### 1a: Create a Twilio account
 1. Go to https://www.twilio.com/try-twilio
 2. Sign up for a free account (you'll need to verify your email and phone number)
 3. When it asks what you want to build, pick anything - it doesn't matter
 
-### 3b: Buy a phone number
+### 1b: Buy a phone number
 1. Once you're logged in, go to https://console.twilio.com/us1/develop/phone-numbers/manage/search
 2. Make sure **"US"** is selected as the country (or whichever country you want)
 3. Make sure the **"SMS"** checkbox is checked under "Capabilities"
@@ -65,7 +31,7 @@ Twilio is the service that actually sends and receives text messages. Here's how
 5. Pick any number from the list and click **"Buy"** (it costs about $1.15/month)
 6. Confirm the purchase
 
-### 3c: Find your credentials
+### 1c: Find your credentials
 1. Go to https://console.twilio.com (the main dashboard)
 2. You'll see two important values right on the dashboard:
    - **Account SID** - starts with "AC" followed by a long string of letters and numbers
@@ -119,103 +85,42 @@ This only needs to be done once.
 pip install -r requirements.txt
 ```
 
+**If you get an error** like "pip is not recognized" or "command not found", try `pip3` instead:
+```
+pip3 install -r requirements.txt
+```
+
+Still not working? Python might not be in your PATH. Go back to Step 1 and reinstall Python, making sure to check that **"Add Python to PATH"** box.
+
 You'll see a bunch of text scroll by as things install. Wait until it finishes (you'll see your cursor come back). If you see "Successfully installed..." at the end, you're good!
 
 ---
 
-## Step 6: Make Your Number Publicly Reachable
+## Step 6: Deploy to Google Cloud (Ask Cynthia For Help)
 
-When someone texts your Twilio number, Twilio needs to forward that message to your computer. For this, we use a free tool called **ngrok** that creates a secure tunnel to your machine.
+The server runs 24/7 on a free Google Cloud virtual machine so it's always ready to receive texts. You don't need to keep your computer on. Cynthia can set this up for you - see the [Deployment Guide](#deployment-guide-for-cynthia) at the bottom of this file.
 
-### 6a: Install ngrok
-1. Go to https://ngrok.com/download
-2. Download the version for your computer
-3. Follow their setup instructions (you'll need to create a free ngrok account)
+Once it's deployed, Cynthia will give you the server's IP address. You'll need it for one thing:
 
-### 6b: Start the tunnel
-1. Open a terminal and type:
-```
-ngrok http 5000
-```
-2. You'll see a screen with a line that says something like:
-```
-Forwarding   https://abc123.ngrok-free.app -> http://localhost:5000
-```
-3. Copy that `https://something.ngrok-free.app` URL
-
-**Leave this terminal window open! Don't close it.**
-
-### 6c: Tell Twilio where to forward messages
+### Tell Twilio where to forward messages
 1. Go to https://console.twilio.com/us1/develop/phone-numbers/manage/incoming
 2. Click on your phone number
 3. Scroll down to **"Messaging Configuration"**
 4. Where it says **"A message comes in"**, set:
    - Select: **Webhook**
-   - URL: paste your ngrok URL and add `/sms` at the end, so it looks like: `https://abc123.ngrok-free.app/sms`
+   - URL: `http://YOUR_SERVER_IP:5000/sms` (Cynthia will give you this)
    - Method: **HTTP POST**
 5. Click **"Save configuration"**
 
----
-
-## Step 7: Start the Server
-
-1. Open a **new** terminal window (keep the ngrok one open!)
-2. Navigate to the project folder (same `cd` command as Step 5)
-3. Type:
-
-```
-python app.py
-```
-
-You should see something like:
-```
- * Running on http://127.0.0.1:5000
-```
-
 **That's it - you're live!** Try texting "SIGNUP" to your Twilio number from your personal phone. You should see the signup flow begin.
 
-**Leave this terminal window open while you want the service to be running.**
-
 ---
 
-## Step 8: Send Weekly Check-In Texts
+## Step 7: Weekly Check-In Texts
 
-Every week (pick a consistent day, like Sunday morning), you need to send out the check-in texts to all your participants. You have two options:
+The weekly texts are sent automatically every Sunday at 10am. The server handles this on its own - you don't need to do anything.
 
-### Option A: Run it manually each week
-1. Open a terminal
-2. Navigate to the project folder
-3. Type:
-```
-python sender.py
-```
-It will send texts to everyone and tell you how many it sent.
-
-**Remember: your server (Step 7) needs to be running when people text back!**
-
-### Option B: Set it up to run automatically
-
-**On Mac (using cron):**
-1. Open a terminal and type `crontab -e`
-2. Add this line (sends every Sunday at 10am):
-```
-0 10 * * 0 cd /path/to/flu-tracker && /usr/bin/python3 sender.py
-```
-Replace `/path/to/flu-tracker` with the actual path to your project folder.
-
-3. Save and close the file
-
-**On Windows (using Task Scheduler):**
-1. Press the Windows key and type "Task Scheduler" - open it
-2. Click **"Create Basic Task"** on the right side
-3. Name it "Flu Tracker Weekly Texts"
-4. Click Next, select **"Weekly"**, click Next
-5. Pick Sunday, set the time to 10:00 AM, click Next
-6. Select **"Start a program"**, click Next
-7. For "Program/script", click Browse and find `python.exe` (usually at `C:\Users\YourName\AppData\Local\Programs\Python\Python312\python.exe`)
-8. For "Add arguments", type: `sender.py`
-9. For "Start in", type the full path to your project folder (e.g. `C:\Users\YourName\Desktop\flu-tracker`)
-10. Click Next, then Finish
+If you ever want to send the weekly texts manually (e.g. you want to change the day), ask Cynthia to run it for you
 
 ---
 
@@ -271,7 +176,153 @@ From your phone, you can text these to your Twilio number:
 
 ## Things to Know
 
-- **The server needs to be running to receive texts.** If someone texts while the server is off, the message is lost. For a more permanent setup, you'd deploy this to a cloud server (ask Cynthia about this if needed).
-- **The ngrok URL changes every time you restart ngrok.** If you restart ngrok, you'll need to update the URL in your Twilio settings (Step 6c). You can get a permanent URL with a paid ngrok plan ($8/month) or by deploying to a cloud server.
-- **Your data is stored in the `data/` folder** as two separate database files. Back this folder up regularly!
+- **The server runs 24/7 in the cloud.** You don't need to keep your computer on. If something goes wrong, ask Cynthia.
+- **Your data is stored on the cloud server** in the `data/` folder as two separate database files. Cynthia can help you back these up.
 - **The `.env` file contains your secrets.** Never share it or commit it to GitHub.
+
+---
+
+## Deployment Guide (For Cynthia)
+
+This section is for setting up the Google Cloud VM. Your friend doesn't need to read this.
+
+### 1. Create a Google Cloud account and project
+
+1. Go to https://console.cloud.google.com
+2. Create a new project (e.g. "flu-tracker")
+3. Make sure billing is enabled (required even for free tier)
+
+### 2. Create the VM
+
+1. Go to **Compute Engine > VM instances** (it may ask you to enable the API first - click Enable)
+2. Click **"Create Instance"**
+3. Configure:
+   - **Name:** `flu-tracker`
+   - **Region:** Pick one close to most participants (e.g. `us-central1`)
+   - **Machine type:** `e2-micro` (this is the free tier one - it'll show "free" in the sidebar)
+   - **Boot disk:** Click "Change", select **Ubuntu 22.04 LTS**, keep the default 10GB disk. Click "Select"
+   - **Firewall:** Check **"Allow HTTP traffic"**
+4. Click **"Create"**
+
+### 3. Open port 5000
+
+1. Go to **VPC Network > Firewall** in the Google Cloud console
+2. Click **"Create Firewall Rule"**
+3. Configure:
+   - **Name:** `allow-flask`
+   - **Targets:** All instances in the network
+   - **Source IP ranges:** `0.0.0.0/0`
+   - **Protocols and ports:** Check "TCP", enter `5000`
+4. Click **"Create"**
+
+### 4. Set up the server
+
+SSH into the VM (click the "SSH" button next to your instance in the console), then run:
+
+```bash
+# Install Python and pip
+sudo apt update && sudo apt install -y python3 python3-pip python3-venv git
+
+# Clone the repo
+git clone https://github.com/YOUR_USERNAME/flu-tracker.git
+cd flu-tracker
+
+# Create a virtual environment and install dependencies
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+
+# Create the .env file
+cp .env.example .env
+nano .env
+# Fill in your Twilio credentials and generate an encryption key:
+# python3 -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+```
+
+### 5. Run the server as a background service
+
+Create a systemd service so the server starts automatically and survives reboots:
+
+```bash
+sudo tee /etc/systemd/system/flu-tracker.service << 'EOF'
+[Unit]
+Description=Flu Tracker SMS Server
+After=network.target
+
+[Service]
+User=$USER
+WorkingDirectory=/home/$USER/flu-tracker
+ExecStart=/home/$USER/flu-tracker/venv/bin/python app.py
+Restart=always
+RestartSec=5
+EnvironmentFile=/home/$USER/flu-tracker/.env
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo systemctl daemon-reload
+sudo systemctl enable flu-tracker
+sudo systemctl start flu-tracker
+```
+
+Check that it's running:
+```bash
+sudo systemctl status flu-tracker
+```
+
+### 6. Set up the weekly sender with cron
+
+```bash
+crontab -e
+```
+
+Add this line (sends every Sunday at 10am UTC - adjust for your timezone):
+```
+0 10 * * 0 cd /home/$USER/flu-tracker && /home/$USER/flu-tracker/venv/bin/python sender.py
+```
+
+### 7. Configure Twilio
+
+1. Get your VM's external IP from the Google Cloud console (shown on the VM instances page)
+2. Go to https://console.twilio.com/us1/develop/phone-numbers/manage/incoming
+3. Click your number, scroll to "Messaging Configuration"
+4. Set webhook to: `http://YOUR_EXTERNAL_IP:5000/sms` (POST)
+5. Save
+
+### 8. Test it
+
+Text "SIGNUP" to the Twilio number. You should get a response within a few seconds.
+
+### Maintenance commands
+
+SSH into the VM and run:
+
+```bash
+# Check if server is running
+sudo systemctl status flu-tracker
+
+# View server logs
+sudo journalctl -u flu-tracker -f
+
+# Restart the server (e.g. after code changes)
+sudo systemctl restart flu-tracker
+
+# Pull latest code from GitHub
+cd ~/flu-tracker && git pull && sudo systemctl restart flu-tracker
+
+# Export data to CSV (downloads to your current directory)
+cd ~/flu-tracker && source venv/bin/activate && python export_data.py
+
+# Back up the databases (copy to Google Cloud Storage or download via SCP)
+# From YOUR machine (not the VM):
+# gcloud compute scp flu-tracker:~/flu-tracker/data/health.db ./health-backup.db
+# gcloud compute scp flu-tracker:~/flu-tracker/data/identity.db ./identity-backup.db
+```
+
+### Cost
+
+This should be **completely free** under Google Cloud's Always Free tier:
+- 1 e2-micro VM
+- 30GB standard persistent disk (we use 10GB)
+- 1GB network egress per month (texts are tiny)
