@@ -36,73 +36,17 @@ Twilio is the service that actually sends and receives text messages. Here's how
 2. You'll see two important values right on the dashboard:
    - **Account SID** - starts with "AC" followed by a long string of letters and numbers
    - **Auth Token** - click "Show" to reveal it - another long string
-3. Write these down or keep this page open - you'll need them in the next step
+3. Write these down or keep this page open - Cynthia will need them for deployment
 
 ---
 
-## Step 4: Configure the Project
-
-1. Open the project folder (the one you unzipped)
-2. Find the file called `.env.example`
-   - **Note:** On some computers, files starting with a dot are hidden. If you can't see it:
-     - **Windows:** In File Explorer, click "View" at the top, then check "Hidden items"
-     - **Mac:** In Finder, press Cmd+Shift+. (period)
-3. Make a copy of `.env.example` and rename the copy to `.env` (just remove the `.example` part)
-4. Open `.env` in any text editor (Notepad is fine!)
-5. Fill in your values:
-
-```
-TWILIO_ACCOUNT_SID=paste_your_account_sid_here
-TWILIO_AUTH_TOKEN=paste_your_auth_token_here
-TWILIO_PHONE_NUMBER=+12125551234
-```
-
-Replace `+12125551234` with the phone number you bought in Step 3b. Keep the `+1` at the beginning - that's the US country code. No spaces, no dashes, just digits after the +1.
-
-6. For the encryption key, you need to generate one. Open a terminal (see Step 1 for how) and type this, then press Enter:
-
-```
-python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
-```
-
-It will print out a long string of random characters. Copy that entire string and paste it as your `ENCRYPTION_KEY` value in the `.env` file.
-
-7. Save the `.env` file.
-
----
-
-## Step 5: Install the Required Packages
-
-This only needs to be done once.
-
-1. Open a terminal
-2. Navigate to the project folder by typing:
-   - **Windows:** `cd Desktop\flu-tracker` (adjust the path if you put it somewhere else)
-   - **Mac:** `cd ~/Desktop/flu-tracker`
-3. Type this command and press Enter:
-
-```
-pip install -r requirements.txt
-```
-
-**If you get an error** like "pip is not recognized" or "command not found", try `pip3` instead:
-```
-pip3 install -r requirements.txt
-```
-
-Still not working? Python might not be in your PATH. Go back to Step 1 and reinstall Python, making sure to check that **"Add Python to PATH"** box.
-
-You'll see a bunch of text scroll by as things install. Wait until it finishes (you'll see your cursor come back). If you see "Successfully installed..." at the end, you're good!
-
----
-
-## Step 6: Deploy to Google Cloud (Ask Cynthia For Help)
+## Step 2: Deploy to Google Cloud (Ask Cynthia For Help)
 
 The server runs 24/7 on a free Google Cloud virtual machine so it's always ready to receive texts. You don't need to keep your computer on. Cynthia can set this up for you - see the [Deployment Guide](#deployment-guide-for-cynthia) at the bottom of this file.
 
 Once it's deployed, Cynthia will give you the server's IP address. You'll need it for one thing:
 
-### Tell Twilio where to forward messages
+### 2a: Tell Twilio where to forward messages
 1. Go to https://console.twilio.com/us1/develop/phone-numbers/manage/incoming
 2. Click on your phone number
 3. Scroll down to **"Messaging Configuration"**
@@ -116,7 +60,7 @@ Once it's deployed, Cynthia will give you the server's IP address. You'll need i
 
 ---
 
-## Step 7: Weekly Check-In Texts
+## Step 3: Weekly Check-In Texts
 
 The weekly texts are sent automatically every Sunday at 10am. The server handles this on its own - you don't need to do anything.
 
@@ -126,16 +70,7 @@ If you ever want to send the weekly texts manually (e.g. you want to change the 
 
 ## Looking at the Data
 
-When you want to see how the study is going:
-
-1. Open a terminal
-2. Navigate to the project folder
-3. Type:
-```
-python export_data.py
-```
-
-This creates a file called **`health_data.csv`** in your project folder. You can open it in **Excel**, **Google Sheets**, or any spreadsheet app.
+When you want to see how the study is going, ask Cynthia to export the data for you. She'll send you a file called **`health_data.csv`** that you can open in **Excel**, **Google Sheets**, or any spreadsheet app.
 
 The CSV file contains:
 - **participant_id** - a random ID (NOT their phone number)
@@ -151,16 +86,6 @@ The CSV file contains:
 **This file is safe to share.** It contains zero phone numbers or identifying information.
 
 ---
-
-## Useful Commands
-
-From the project folder in a terminal:
-
-| What you want to do | Command |
-|---|---|
-| Start the server | `python app.py` |
-| Send weekly texts | `python sender.py` |
-| Export data to CSV | `python export_data.py` |
 
 ## Useful Texts
 
